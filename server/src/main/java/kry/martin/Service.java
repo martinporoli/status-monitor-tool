@@ -1,25 +1,28 @@
 package kry.martin;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Representation of a service.
  */
 public class Service {
+	private static final AtomicInteger COUNTER = new AtomicInteger();
 
-	private final String id;
+	private final int id;
 	private final String name;
 	private final String url;
 	private final Status status;
 	private final long lastChecked;
 	
-	public Service(String id, String name, String url, Status status, long lastChecked) {
-		this.id = id;
+	public Service(String name, String url, Status status, long lastChecked) {
+		this.id = COUNTER.getAndIncrement();
 		this.name = name;
 		this.url = url;
 		this.status = status;
 		this.lastChecked = lastChecked;
 	}
 	
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 	

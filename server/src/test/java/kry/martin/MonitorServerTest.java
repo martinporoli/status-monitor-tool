@@ -30,11 +30,11 @@ public class MonitorServerTest {
 	public void testMonitorServer(TestContext context) {
 		final Async async = context.async();
 	
-		vertx.createHttpClient().getNow(MonitorServer.DEFAULT_PORT, 
-				"localhost", "/",
+		vertx.createHttpClient().getNow(AbstractMonitorServer.DEFAULT_PORT, 
+				"localhost", "/test",
 				response -> {
 					response.handler(body -> {
-						context.assertTrue(body.toString().contains("HELLO"));
+						context.assertTrue(body.toString().contains("This is a test"));
 						async.complete();
 					});
 				});

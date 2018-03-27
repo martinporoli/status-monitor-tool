@@ -1,38 +1,27 @@
 package kry.martin;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.http.HttpServer;
-import io.vertx.ext.web.Router;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.web.RoutingContext;
 
-/**
- * The server for the service monitor tool.
- */
-public class MonitorServer extends AbstractVerticle {
-	
-	public static final int DEFAULT_PORT = 8880;
+public class MonitorServer extends AbstractMonitorServer {
 
-	private HttpServer server;
-	
-	@Override
-	public void start(Future<Void> fut) throws Exception {
-		Router router = Router.router(vertx);
-		server = vertx.createHttpServer();
-		server.requestHandler(router::accept);
-		server.listen(
-				config().getInteger("http.port", DEFAULT_PORT), 
-				res -> {
-					if (res.succeeded()) {
-						fut.complete();
-					} else {
-						fut.fail(res.cause());
-					}
-		});
+	@HandlingRequest(httpMethod=HttpMethod.GET, path="/test")
+	private void handleTest(RoutingContext context) {
+		context.response().end("<h1>This is a test</h1>");
 	}
 	
-	@Override
-	public void stop() throws Exception {
-		super.stop();
-		server.close();
+	@HandlingRequest(httpMethod=HttpMethod.GET, path="/service")
+	private void handleServiceGet(RoutingContext context) {
+		// TODO
+	}
+	
+	@HandlingRequest(httpMethod=HttpMethod.POST, path="/service")
+	private void handlerServicePost(RoutingContext context) {
+		// TODO
+	}
+	
+	@HandlingRequest(httpMethod=HttpMethod.DELETE, path="/service/:id")
+	private void handleServiceDelete(RoutingContext context) {
+		// TODO
 	}
 }
