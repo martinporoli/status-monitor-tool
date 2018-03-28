@@ -24,6 +24,20 @@ public class Service {
 		this.lastChecked = lastChecked;
 	}
 	
+	public Service() {
+		this.id = -1;
+	}
+	
+	/**
+	 * Takes a JSON and returns the Service that it specifies.
+	 * 
+	 * Assumes the JSON includes an:
+	 * 	 - id
+	 * 	 - name
+	 * 	 - url
+	 *   - status
+	 *   - lastChecked
+	 */
 	public static Service fromJson(JsonObject json) {
 		Service service = new Service();
 		service.id = json.getInteger("id");
@@ -32,10 +46,6 @@ public class Service {
 		service.status = json.getString("status");
 		service.lastChecked = json.getLong("lastChecked");
 		return service;
-	}
-	
-	public Service() {
-		this.id = COUNTER.getAndIncrement();
 	}
 	
 	public JsonObject toJson() {
@@ -86,6 +96,10 @@ public class Service {
 	
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	
+	public static int nextId() {
+		return COUNTER.getAndIncrement();
 	}
 	
 	@Override

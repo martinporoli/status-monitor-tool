@@ -8,6 +8,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
+/**
+ * Server that handles the REST API.
+ */
 public class MonitorServer extends AbstractMonitorServer {
 	
 	private ServiceStore store;
@@ -16,14 +19,13 @@ public class MonitorServer extends AbstractMonitorServer {
 		this.store = store;
 	}
 	
-	@HandlingRequest(httpMethod=HttpMethod.GET, path="/test")
+	@HandlingRequest(path="/test")
 	private void handleTest(RoutingContext context) {
 		context.response().end("<h1>This is a test</h1>");
 	}
 
-	@HandlingRequest(httpMethod=HttpMethod.GET, path="/service")
+	@HandlingRequest(path="/service")
 	private void handleServiceGet(RoutingContext context) {
-		System.out.println("GET service/");
 		List<Service> services = store.getAllServices();
 		
 		JsonArray array = new JsonArray();
@@ -35,21 +37,30 @@ public class MonitorServer extends AbstractMonitorServer {
 		context.response().end(Json.encodePrettily(json));
 	}
 
-	@HandlingRequest(httpMethod=HttpMethod.POST, path="/service")
+	@HandlingRequest(path="/service", method=HttpMethod.POST)
 	private void handlerServicePost(RoutingContext context) {
-		System.out.println("POST service/");
 		Service created = Json.decodeValue(context.getBodyAsString(), Service.class);
+		created.setId(Service.nextId());
 		store.createService(created);
+		// Send a request for the status checker to check the status of the service
+		vertx.eventBus().send(StatusChecker.ADDRESS, created.getUrl(), reply -> {
+			if (reply.failed()) {
+				//TODO
+			} else {
+				String status = (String) reply.result().body();
+				store.updateStatus(created.getId(), status);
+			}
+		});
+		
 		context.response()
 			.setStatusCode(200)
 			.putHeader("content-type", "application/json; charset=utf-8")
 			.end(Json.encode(created));
 	}
 
-	@HandlingRequest(httpMethod=HttpMethod.DELETE, path="/service/:id")
+	@HandlingRequest(path="/service/:id", method=HttpMethod.DELETE)
 	private void handleServiceDelete(RoutingContext context) {
 		String id = context.request().getParam("id");
-		System.out.println("DELETE service/"+id);
 		if (id == null) {
 			context.response().setStatusCode(400).end();
 	    } else {

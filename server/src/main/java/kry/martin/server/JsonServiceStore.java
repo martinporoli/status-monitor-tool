@@ -10,22 +10,36 @@ import java.util.List;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * Service store that uses a simple json file as the storage
+ */
 public class JsonServiceStore implements ServiceStore {
 	
 	private static final Path DEFAULT_STORE_PATH = Paths.get("services.json");
 	
 	private final Path storePath;
 	
+	/**
+	 * Constructor which will use a default store path
+	 */
 	public JsonServiceStore() {
 		this.storePath = DEFAULT_STORE_PATH;
 		initFile();
 	}
 	
+	/**
+	 * Constructor with a specification of the path of the 
+	 * json to be stored.
+	 */
 	public JsonServiceStore(String path) {
 		this.storePath = Paths.get(path);
 		initFile();
 	}
 	
+	/**
+	 * Checks it the file exists. If not, creates it and fill it with an
+	 * empty list of services
+	 */
 	private void initFile() {
 		if (!Files.exists(storePath)) {
 			JsonObject json = new JsonObject();
@@ -34,6 +48,9 @@ public class JsonServiceStore implements ServiceStore {
 		}
 	}
 	
+	/**
+	 * Returns the storage as a JSON object
+	 */
 	private synchronized JsonObject store() {
 		String json = "";
 		try {
@@ -44,6 +61,9 @@ public class JsonServiceStore implements ServiceStore {
 		return new JsonObject(json);
 	}
 	
+	/**
+	 * Overwrites the specified JSON to the storage.
+	 */
 	private synchronized void writeToStore(JsonObject json) {
 		byte[] bytes = json.encodePrettily().getBytes();
 		try {
@@ -82,7 +102,7 @@ public class JsonServiceStore implements ServiceStore {
 		int removeIndex = findIndex(array, id);
 		if (removeIndex != -1) {
 			array.remove(removeIndex);
-			initStore(array);
+			writeArray(array);
 		}
 	}
 
@@ -90,18 +110,7 @@ public class JsonServiceStore implements ServiceStore {
 	public void createService(Service service) {
 		JsonArray a = store().getJsonArray("services");
 		a.add(service.toJson());
-		initStore(a);
-	}
-	
-	private void initStore(JsonArray array) {
-		JsonObject store = new JsonObject();
-		store.put("services", array);
-		writeToStore(store);
-	}
-
-	@Override
-	public String toString() {
-		return store().toString();
+		writeArray(a);
 	}
 
 	@Override
@@ -118,9 +127,27 @@ public class JsonServiceStore implements ServiceStore {
 		Service service = getService(id);
 		removeService(id);
 		service.setStatus(status);
+		service.setLastChecked(System.currentTimeMillis());
 		createService(service);
 	}
 	
+	/**
+	 * Since the stored JSON only has one value (list) in the lowest 
+	 * level, it is sometimes easier handle the storage as an array.
+	 * 
+	 * This method writes the array to the correct place in the storage.
+	 */
+	private void writeArray(JsonArray array) {
+		JsonObject store = new JsonObject();
+		store.put("services", array);
+		writeToStore(store);
+	}
+
+	/**
+	 * Finds the index of the specified id in the specified array
+	 * 
+	 * Return -1 if no such index is found.
+	 */
 	private int findIndex(JsonArray array, int id) {
 		int index = -1;
 		for (int i = 0; i < array.size(); i++) {
@@ -132,5 +159,10 @@ public class JsonServiceStore implements ServiceStore {
 			}
 		}
 		return index;
+	}
+	
+	@Override
+	public String toString() {
+		return store().toString();
 	}
 }

@@ -12,5 +12,5 @@ import io.vertx.core.http.HttpMethod;
 @Target(METHOD)
 public @interface HandlingRequest {
 	String path();
-	HttpMethod httpMethod() default HttpMethod.GET;
+	HttpMethod method() default HttpMethod.GET;
 }

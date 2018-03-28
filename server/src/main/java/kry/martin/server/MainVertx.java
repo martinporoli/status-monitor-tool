@@ -5,6 +5,14 @@ import java.io.IOException;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 
+/**
+ * Main class of the Service Monitoring Tool.
+ * 
+ * Starts a vertx and deploys the Verticles needed:
+ *   - StatusChecker
+ *   - MonitorServer
+ *   - StatusUpdater
+ */
 public class MainVertx {
 
 	public static void main(String[] args) {
@@ -16,7 +24,10 @@ public class MainVertx {
 			System.out.println("[WARNING] Could not find config file. Using default configuration");
 			options = new DeploymentOptions();
 		}
-		vertx.deployVerticle(new MonitorServer(new JsonServiceStore()), options);
+		JsonServiceStore store = new JsonServiceStore();
+		vertx.deployVerticle(new StatusChecker(), options);
+		vertx.deployVerticle(new MonitorServer(store), options);
+		vertx.deployVerticle(new StatusUpdater(store), options);
 	}
 	
 }
