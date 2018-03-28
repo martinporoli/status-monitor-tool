@@ -1,4 +1,4 @@
-package kry.martin;
+package kry.martin.server;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ public class MainVertx {
 			System.out.println("[WARNING] Could not find config file. Using default configuration");
 			options = new DeploymentOptions();
 		}
-		vertx.deployVerticle(new MonitorServer(), options);
+		vertx.deployVerticle(new MonitorServer(new JsonServiceStore()), options);
 	}
 	
 }

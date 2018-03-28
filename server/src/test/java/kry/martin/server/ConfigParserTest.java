@@ -1,4 +1,4 @@
-package kry.martin;
+package kry.martin.server;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import kry.martin.server.ConfigParser;
 
 @RunWith(VertxUnitRunner.class)
 public class ConfigParserTest {

@@ -1,4 +1,4 @@
-package kry.martin;
+package kry.martin.server;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

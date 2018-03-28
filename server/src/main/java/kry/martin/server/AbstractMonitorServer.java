@@ -1,4 +1,4 @@
-package kry.martin;
+package kry.martin.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,6 +9,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 
 /**
  * The server for the service monitor tool.
@@ -36,8 +37,14 @@ public abstract class AbstractMonitorServer extends AbstractVerticle {
 				});
 	}
 
+	/**
+	 * Initializes the router.
+	 * Uses reflection to find the correct method from the derived class.
+	 */
 	private Router initRouter() {
 		Router router = Router.router(vertx);
+		// Initialize index page
+		router.route("/").handler(StaticHandler.create("assets"));
 		for (Method method : this.getClass().getDeclaredMethods()) {
 			HandlingRequest hr = method.getAnnotation(HandlingRequest.class);
 			if (hr != null) {
@@ -48,6 +55,7 @@ public abstract class AbstractMonitorServer extends AbstractVerticle {
 					});
 					break;
 				case POST:
+					router.route(hr.path()+"*").handler(BodyHandler.create());
 					router.post(hr.path()).handler(routingContext -> {
 						handleRequest(method, routingContext);
 					});
@@ -65,6 +73,10 @@ public abstract class AbstractMonitorServer extends AbstractVerticle {
 		return router;
 	}
 
+	/**
+	 * Takes a method and a routingContext and invokes the method with the 
+	 * context as the only parameter.
+	 */
 	private void handleRequest(Method method, RoutingContext routingContext) {
 		try {
 			method.setAccessible(true);
