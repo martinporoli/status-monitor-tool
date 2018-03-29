@@ -13,7 +13,7 @@ The runnable jar is the one ending with a "-fat.jar"
 So, if you stand in the server directory you would do this to run it:
 - java -jar target/service-monitor-tool-1.0-fat.jar
 
-The program starts a server that runs on localhost:8882
+The program starts a server that runs on localhost:8882. This is where you'll find the beautiful front-end of the program.
 Easy peasy
 
 ### Project Structure
