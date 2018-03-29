@@ -18,33 +18,42 @@ function remove(id) {
 }
 
 function load() {
+	console.log("Loading page");
 	$("#content").children().remove();
 	$.getJSON("/service", function (data) {
-		$.each(data, function (key, val) {
-			$("<tr><td>" + val.id + "</td><td>" + val.name + "</td><td>" + val.url + "</td>" +
-	            "<td>" + val.status + "</td>" +
-	            "<td>" +
-	            "<button data-action='delete' class='btn delete-btn' " +
-	            "data-name='" + val.name + "' " +
-	            "data-url='" + val.url + "' " +
-	            "data-id='" + val.id + "' " +
-	            "data-status='" + val.status + "'></button>" +
-	            "</td>" +
-	            "</tr>").appendTo("#content");
-		}
-	}
+		$.each(data, function (k, v) {
+			if (k === "services") {
+				$.each(v, function(key, val) {
+				    $("<tr><td>" + val.id + "</td><td>" + val.name + "</td><td>" + val.url + "</td>" +
+			            "<td>" + val.status + "</td>" +
+			            "<td>" +
+			            "<button class='delbtn' " +
+			            "data-name='" + val.name + "' " +
+			            "data-url='" + val.url + "' " +
+			            "data-id='" + val.id + "' " +
+			            "data-status='" + val.status + "'>Delete</button>" +
+			            "</td>" +
+			            "</tr>").appendTo("#content");
+				})
+			}
+		})
+	});
 	initCallbacks();
 }
 
 function initCallbacks() {
-    $(".delete-btn").unbind().click(function() {
-       var id = $(this).data("id");
-       remove(id);
+    $("#content").unbind().on("click", ".delbtn", function() {
+        var id = $(this).data("id");
+        console.log("Pressing delete button: "+id);
+        remove(id);
     });
     
     $("#add-btn").unbind().click(function() {
     	var name = $("#input-name").val();
     	var url = $("#input-url").val();
+    	$("#input-name").val('');
+    	$("#input-url").val('');
+    	console.log("Pressing add button: "+name+", "+url);
     	create(name, url);
     });
 }
