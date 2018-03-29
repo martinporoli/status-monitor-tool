@@ -15,7 +15,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class JsonServiceStore implements ServiceStore {
 	
-	private static final Path DEFAULT_STORE_PATH = Paths.get("services.json");
+	private static final Path DEFAULT_STORE_PATH = Paths.get("db/services.json");
 	
 	private final Path storePath;
 	
@@ -84,6 +84,10 @@ public class JsonServiceStore implements ServiceStore {
 		return services;
 	}
 
+	/**
+	 * Gets the service with the given id from the store.
+	 * If no such service exists, returns null.
+	 */
 	@Override
 	public Service getService(int id) {
 		JsonArray array = store().getJsonArray("services");
@@ -96,6 +100,10 @@ public class JsonServiceStore implements ServiceStore {
 		return null;
 	}
 
+	/**
+	 * Removes the service with the given id from the store.
+	 * If no such service exists, does nothing.
+	 */
 	@Override
 	public void removeService(int id) {
 		JsonArray array = store().getJsonArray("services");
@@ -113,6 +121,9 @@ public class JsonServiceStore implements ServiceStore {
 		writeArray(a);
 	}
 
+	/**
+	 * Deletes the file containing the JSON storage.
+	 */
 	@Override
 	public void deleteStore() {
 		try {
@@ -122,9 +133,20 @@ public class JsonServiceStore implements ServiceStore {
 		}
 	}
 
+	/**
+	 * Updates the status of the service with the given id.
+	 * 
+	 * If no such service exists, prints an error message.
+	 */
 	@Override
 	public void updateStatus(int id, String status) {
 		Service service = getService(id);
+		if (service == null) {
+			// Might be that a service has been removed while updating its status.
+			System.out.println("[ServiceStore] ERROR: Trying to remove service with id "+
+					id+", no such service exists.");
+			return;
+		}
 		removeService(id);
 		service.setStatus(status);
 		service.setLastChecked(System.currentTimeMillis());

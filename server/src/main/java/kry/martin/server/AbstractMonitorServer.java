@@ -55,7 +55,7 @@ public abstract class AbstractMonitorServer extends AbstractVerticle {
 		// Initialize index page
 		router.route("/").handler(StaticHandler.create("assets"));
 		for (Method method : this.getClass().getDeclaredMethods()) {
-			HandlingRequest hr = method.getAnnotation(HandlingRequest.class);
+			Routes hr = method.getAnnotation(Routes.class);
 			if (hr != null) {
 				switch (hr.method()) {
 				case GET:

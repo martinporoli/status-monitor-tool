@@ -1,6 +1,10 @@
 package kry.martin.server;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
 import io.vertx.ext.web.client.WebClient;
 
 /**
@@ -35,11 +39,16 @@ public class StatusChecker extends AbstractVerticle {
 							updatedStatus = "OK";
 						}
 					} else {
-						System.out.println("ERROR: "+ar.cause().getMessage());
+						System.err.println("ERROR: "+ar.cause().getMessage());
 					}
 					message.reply(updatedStatus);
 				});
 			});
+	}
+	
+	public static void checkStatus(EventBus eventbus, String url, 
+			Handler<AsyncResult<Message<String>>> handler) {
+		eventbus.send(ADDRESS, url, handler);
 	}
 	
 	/**

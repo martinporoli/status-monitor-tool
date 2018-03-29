@@ -30,9 +30,10 @@ public class StatusUpdater extends AbstractVerticle {
 	 * Sends a request to the status checker. Uses the reply to update the storage.
 	 */
 	public void updateStatus(Service service) {
-		vertx.eventBus().send(StatusChecker.ADDRESS, service.getUrl(), reply -> {
+		StatusChecker.checkStatus(vertx.eventBus(), service.getUrl(), reply -> {
 			if (reply.failed()) {
-				//TODO
+				System.err.println("[StatusUpdater] ERROR: Message from Status Checker failed."
+						+reply.cause().getMessage());
 			} else {
 				String status = (String) reply.result().body();
 				store.updateStatus(service.getId(), status);

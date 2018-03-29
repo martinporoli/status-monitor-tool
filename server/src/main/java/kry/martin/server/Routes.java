@@ -10,7 +10,7 @@ import io.vertx.core.http.HttpMethod;
 
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface HandlingRequest {
+public @interface Routes {
 	String path();
 	HttpMethod method() default HttpMethod.GET;
 }

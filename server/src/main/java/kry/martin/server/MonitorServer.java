@@ -19,12 +19,15 @@ public class MonitorServer extends AbstractMonitorServer {
 		this.store = store;
 	}
 	
-	@HandlingRequest(path="/test")
+	@Routes(path="/test")
 	private void handleTest(RoutingContext context) {
 		context.response().end("<h1>This is a test</h1>");
 	}
 
-	@HandlingRequest(path="/service")
+	/**
+	 * Returns all services
+	 */
+	@Routes(path="/service")
 	private void handleServiceGet(RoutingContext context) {
 		List<Service> services = store.getAllServices();
 		
@@ -37,15 +40,19 @@ public class MonitorServer extends AbstractMonitorServer {
 		context.response().end(Json.encodePrettily(json));
 	}
 
-	@HandlingRequest(path="/service", method=HttpMethod.POST)
+	/**
+	 * Adds a new service
+	 */
+	@Routes(path="/service", method=HttpMethod.POST)
 	private void handlerServicePost(RoutingContext context) {
 		Service created = Json.decodeValue(context.getBodyAsString(), Service.class);
 		created.setId(Service.nextId());
 		store.createService(created);
 		// Send a request for the status checker to check the status of the service
-		vertx.eventBus().send(StatusChecker.ADDRESS, created.getUrl(), reply -> {
+		StatusChecker.checkStatus(vertx.eventBus(), created.getUrl(), reply -> {
 			if (reply.failed()) {
-				//TODO
+				System.err.println("[MonitorServer] ERROR: Message from Status Checker failed."
+						+reply.cause().getMessage());
 			} else {
 				String status = (String) reply.result().body();
 				store.updateStatus(created.getId(), status);
@@ -58,7 +65,10 @@ public class MonitorServer extends AbstractMonitorServer {
 			.end(Json.encode(created));
 	}
 
-	@HandlingRequest(path="/service/:id", method=HttpMethod.DELETE)
+	/**
+	 * Deletes a service
+	 */
+	@Routes(path="/service/:id", method=HttpMethod.DELETE)
 	private void handleServiceDelete(RoutingContext context) {
 		String id = context.request().getParam("id");
 		if (id == null) {
